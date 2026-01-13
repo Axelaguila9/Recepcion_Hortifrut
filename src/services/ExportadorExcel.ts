@@ -13,11 +13,13 @@ export class ExportadorExcel {
   
   /**
    * Genera y descarga un archivo Excel con las 3 hojas completas
+   * @param customFileName - Nombre personalizado para el archivo (sin extensión)
    */
   static async exportReport(
     reportData: ReportData,
     huellaData: HuellaRow[],
-    recepcionData: RecepcionRow[]
+    recepcionData: RecepcionRow[],
+    customFileName?: string
   ): Promise<void> {
     const workbook = new ExcelJS.Workbook();
 
@@ -36,8 +38,15 @@ export class ExportadorExcel {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    const fecha = reportData.fecha.replace(/ /g, '_');
-    link.download = `Reporte_${fecha}.xlsx`;
+    
+    // Usar nombre personalizado o generar uno por defecto
+    if (customFileName && customFileName.trim()) {
+      link.download = `${customFileName.trim()}.xlsx`;
+    } else {
+      const fecha = reportData.fecha.replace(/ /g, '_');
+      link.download = `Reporte_${fecha}.xlsx`;
+    }
+    
     link.click();
     window.URL.revokeObjectURL(url);
   }

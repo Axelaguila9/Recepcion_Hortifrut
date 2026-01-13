@@ -28,7 +28,7 @@ export class ServicioEmail {
       await this.copyImageToClipboard(canvas);
       
       // 5. Abrir cliente de correo
-      this.openEmailClient(reportData);
+      this.openEmailClient();
       
       // 6. Limpiar DOM
       document.body.removeChild(htmlContainer);
@@ -67,22 +67,11 @@ export class ServicioEmail {
   }
 
   /**
-   * Abre el cliente de correo con el contenido del reporte
+   * Abre el cliente de correo con asunto simple
    */
-  private static openEmailClient(reportData: ReportData): void {
-    const asunto = `Reporte de Recepción - ${reportData.fecha}`;
-    const cuerpo = `Reporte de Recepción - Zarzamora
-Fecha: ${reportData.fecha}
-
-[Presiona Ctrl+V para pegar la imagen del reporte aquí]
-
-RESUMEN:
-- Total Cajas: ${reportData.totalCajas.toLocaleString()}
-- Total Kilos: ${reportData.totalKilos.toLocaleString()}
-- Especies: ${reportData.porEspecie.length}
-- Productores: ${reportData.porProductor.length}`;
-
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+  private static openEmailClient(): void {
+    const asunto = 'Reporte de Recepción la Cascada MX30';
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(asunto)}`;
     window.location.href = mailtoLink;
   }
 

@@ -50,18 +50,6 @@ function Cierre() {
     }
   };
 
-  /**
-   * Obtiene la fecha actual formateada
-   */
-  const getCurrentDate = (): string => {
-    return new Date().toLocaleDateString('es-MX', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   return (
     <>
       <Header />
@@ -75,9 +63,6 @@ function Cierre() {
               <span className="text-5xl">📊</span>
               Cierre de Recepción - Zarzamora
             </h1>
-            <p className="text-gray-600 text-lg">
-              {reportData ? reportData.fecha : getCurrentDate()}
-            </p>
           </div>
 
           {/* Sección de carga de archivos */}
@@ -94,8 +79,8 @@ function Cierre() {
               </div>
             </div>
 
-            {/* Grid de carga de archivos */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {/* Grid de carga de archivos - Solo 2 archivos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <FileUploader
                 label="Huella de Cosecha"
                 file={files.huella}
@@ -107,11 +92,6 @@ function Cierre() {
                 file={files.recepcion}
                 onChange={(file) => handleFileChange('recepcion', file)}
                 required
-              />
-              <FileUploader
-                label="Recepción de Pallets"
-                file={files.pallets}
-                onChange={(file) => handleFileChange('pallets', file)}
               />
             </div>
 
