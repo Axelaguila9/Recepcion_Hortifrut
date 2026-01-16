@@ -108,7 +108,7 @@ export class ServicioEmail {
       <h2 style="color: #1f2937; border-bottom: 3px solid #3b82f6; padding-bottom: 10px;">
         📊 Reporte de Recepción - Zarzamora
       </h2>
-      <p style="font-size: 16px; margin: 20px 0;"><strong>Fecha:</strong> ${reportData.fecha}</p>
+
     `;
   }
 
