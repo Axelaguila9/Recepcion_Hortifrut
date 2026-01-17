@@ -160,7 +160,7 @@ function Cierre() {
                 ]}
               />
 
-              {/* Tabla por Especie */}
+              {/* Tabla por Especie - CON TOTAL */}
               <ReportTable
                 title="1- Recepción por especie día"
                 icon="🫐"
@@ -173,9 +173,10 @@ function Cierre() {
                   item.kilosFinales,
                   item.entregas
                 ])}
+                showTotal={true}
               />
 
-              {/* Tabla por SKU */}
+              {/* Tabla por SKU - CON TOTAL */}
               <ReportTable
                 title="2- Recepción por SKU día"
                 icon="📦"
@@ -188,9 +189,10 @@ function Cierre() {
                   item.kilosFinales,
                   item.entregas
                 ])}
+                showTotal={true}
               />
 
-              {/* Tabla por Productor con scroll */}
+              {/* Tabla por Productor - CON TOTAL y scroll */}
               <ReportTable
                 title="3- Recepción por productor día"
                 icon="👨‍🌾"
@@ -204,6 +206,7 @@ function Cierre() {
                   item.entregas
                 ])}
                 maxHeight="600px"
+                showTotal={true}
               />
 
               {/* Acciones */}

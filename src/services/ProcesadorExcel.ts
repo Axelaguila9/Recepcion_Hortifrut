@@ -80,8 +80,8 @@ export class ProcesadorExcel {
     huellaData: HuellaRow[],
     recepcionData: RecepcionRow[]
   ): ReportData {
-    // Extraer fecha del reporte
-    const fecha = this.extractFecha(recepcionData);
+    // NO generar fecha - dejar vacío
+    const fecha = '';
     
     // Calcular tiempos operativos
     const tiempoOperativo = this.calcularTiempoOperativo(huellaData);
@@ -105,22 +105,6 @@ export class ProcesadorExcel {
       huellaDataCruda: huellaData,
       recepcionDataCruda: recepcionData
     };
-  }
-
-  /**
-   * Extrae y formatea la fecha del reporte
-   */
-  private static extractFecha(recepcionData: RecepcionRow[]): string {
-    const fechaEmbalaje = recepcionData[0]?.['Fecha Embalaje'];
-    
-    if (!fechaEmbalaje) return 'N/A';
-    
-    const fecha = new Date(fechaEmbalaje);
-    return fecha.toLocaleDateString('es-MX', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
   }
 
   /**
@@ -163,50 +147,44 @@ export class ProcesadorExcel {
 
       // 4. Paletizado = (Hora Inicio PreFrio - Hora Fin Rev. Calida) * 60 * 24
       if (row['Hora Fin Rev. Calida'] && row['Hora Inicio PreFrio']) {
-        // ORDEN CORRECTO: Calida primero, PreFrio segundo
         const diff = convertExcelTimeToMinutes(
-          row['Hora Fin Rev. Calida'],    // time1
-          row['Hora Inicio PreFrio']       // time2
+          row['Hora Fin Rev. Calida'],
+          row['Hora Inicio PreFrio']
         );
-        // time2 - time1 = PreFrio - Calida ✓
         tiempos.paletizado.push(diff);
       }
 
-// 5. Prefrio - Replica EXACTAMENTE la fórmula de Excel
-if (row['Hora Inicio PreFrio'] && row['Hora Fin PreFrio']) {
-  const inicio = row['Hora Inicio PreFrio'];
-  const fin = row['Hora Fin PreFrio'];
-  
-  let diff;
-  
-  // Si son strings, convertir primero a números Excel (fracción de día)
-  let inicioNum: number;
-  let finNum: number;
-  
-  if (typeof inicio === 'string') {
-    const [h, m, s] = inicio.split(':').map(Number);
-    inicioNum = (h + m/60 + s/3600) / 24;
-  } else {
-    inicioNum = inicio;
-  }
-  
-  if (typeof fin === 'string') {
-    const [h, m, s] = fin.split(':').map(Number);
-    finNum = (h + m/60 + s/3600) / 24;
-  } else {
-    finNum = fin;
-  }
-  
-  if (inicioNum < finNum) {
-    // Caso positivo: (Fin - Inicio) * 60 * 24
-    diff = convertExcelTimeToMinutes(inicio, fin);
-  } else {
-    // Caso negativo: (Fin - Inicio) * 60 * 24 * 24
-    diff = convertExcelTimeToMinutes(inicio, fin) * 24;
-  }
-  
-  tiempos.prefrio.push(diff);
-}
+      // 5. Prefrio - Replica EXACTAMENTE la fórmula de Excel
+      if (row['Hora Inicio PreFrio'] && row['Hora Fin PreFrio']) {
+        const inicio = row['Hora Inicio PreFrio'];
+        const fin = row['Hora Fin PreFrio'];
+        
+        let diff;
+        let inicioNum: number;
+        let finNum: number;
+        
+        if (typeof inicio === 'string') {
+          const [h, m, s] = inicio.split(':').map(Number);
+          inicioNum = (h + m/60 + s/3600) / 24;
+        } else {
+          inicioNum = inicio;
+        }
+        
+        if (typeof fin === 'string') {
+          const [h, m, s] = fin.split(':').map(Number);
+          finNum = (h + m/60 + s/3600) / 24;
+        } else {
+          finNum = fin;
+        }
+        
+        if (inicioNum < finNum) {
+          diff = convertExcelTimeToMinutes(inicio, fin);
+        } else {
+          diff = convertExcelTimeToMinutes(inicio, fin) * 24;
+        }
+        
+        tiempos.prefrio.push(diff);
+      }
 
       // 6. Salvataje = Hora Fin Reembalado - Hora Fin Rev. Calida
       if (row['Hora Fin Rev. Calida'] && row['Hora Fin Reembalado']) {

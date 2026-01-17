@@ -11,29 +11,22 @@ export class ServicioEmail {
    */
   static async sendReportByEmail(reportData: ReportData): Promise<void> {
     try {
-      // 1. Crear contenedor HTML con el reporte
       const htmlContainer = this.createReportHTML(reportData);
-      
-      // 2. Agregar al DOM temporalmente
       document.body.appendChild(htmlContainer);
       
-      // 3. Convertir a imagen usando html2canvas
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const canvas = await html2canvas(htmlContainer, {
         scale: 2,
         backgroundColor: '#ffffff',
-        logging: false
+        logging: false,
+        useCORS: true
       });
       
-      // 4. Copiar imagen al portapapeles
       await this.copyImageToClipboard(canvas);
-      
-      // 5. Abrir cliente de correo
+      document.body.removeChild(htmlContainer);
       this.openEmailClient();
       
-      // 6. Limpiar DOM
-      document.body.removeChild(htmlContainer);
-      
-      // 7. Notificar al usuario
       alert('✅ Imagen copiada al portapapeles!\n\n📧 Se abrirá tu correo.\n📋 Haz Ctrl+V para pegar la imagen.');
       
     } catch (error) {
@@ -42,9 +35,6 @@ export class ServicioEmail {
     }
   }
 
-  /**
-   * Copia la imagen del canvas al portapapeles
-   */
   private static async copyImageToClipboard(canvas: HTMLCanvasElement): Promise<void> {
     return new Promise((resolve, reject) => {
       canvas.toBlob(async (blob) => {
@@ -60,35 +50,43 @@ export class ServicioEmail {
           resolve();
         } catch (err) {
           console.warn('No se pudo copiar al portapapeles:', err);
-          resolve(); // No fallar si el clipboard no funciona
+          resolve();
         }
       });
     });
   }
 
-  /**
-   * Abre el cliente de correo con asunto simple
-   */
   private static openEmailClient(): void {
     const asunto = 'Reporte de Recepción la Cascada MX30';
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(asunto)}`;
+    
+    const destinatariosPara = ['btacambaro2@hortifrut.com'].join(',');
+    
+    const destinatariosCC = [
+      'msaucedo@hortifrut.com', 'layala@hortifrut.com', 'mariagaitanr@gmail.com',
+      'vsosa@hortifrut.com', 'hmeza@hortifrut.com', 'imondragon@hortifrut.com',
+      'jvargas@hortifrut.com', 'aatzimba@hortifrut.com', 'amiranda@hortifrut.com',
+      'fgamino@hortifrut.com', 'jrosas@hortifrut.com', 'asereno@hortifrut.com',
+      'jpenaloza@hortifrut.com', 'lramirez@hortifrut.com', 'lramirezm@hortifrut.com',
+      'lceja@hortifrut.com'
+    ].join(',');
+    
+    const mailtoLink = `mailto:${destinatariosPara}?subject=${encodeURIComponent(asunto)}&cc=${encodeURIComponent(destinatariosCC)}`;
     window.location.href = mailtoLink;
   }
 
-  /**
-   * Crea el HTML del reporte con estilos profesionales
-   */
   private static createReportHTML(reportData: ReportData): HTMLDivElement {
     const container = document.createElement('div');
     container.style.position = 'absolute';
     container.style.left = '-9999px';
+    container.style.top = '0';
     container.style.background = 'white';
     container.style.padding = '40px';
     container.style.width = '1200px';
+    container.style.fontFamily = 'Arial, sans-serif';
     
     container.innerHTML = `
       <div style="font-family: Arial, sans-serif; color: #333;">
-        ${this.createHeaderHTML(reportData)}
+        ${this.createHeaderHTML()}
         ${this.createSummaryHTML(reportData)}
         ${this.createTiempoOperativoHTML(reportData)}
         ${this.createEspecieHTML(reportData)}
@@ -100,21 +98,16 @@ export class ServicioEmail {
     return container;
   }
 
-  /**
-   * Genera HTML del encabezado
-   */
-  private static createHeaderHTML(reportData: ReportData): string {
+  private static createHeaderHTML(): string {
     return `
-      <h2 style="color: #1f2937; border-bottom: 3px solid #3b82f6; padding-bottom: 10px;">
-        📊 Reporte de Recepción - Zarzamora
-      </h2>
-
+      <div style="margin-bottom: 30px;">
+        <h2 style="color: #1f2937; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; margin: 0;">
+          📊 Reporte de Recepción - Zarzamora
+        </h2>
+      </div>
     `;
   }
 
-  /**
-   * Genera HTML del resumen
-   */
   private static createSummaryHTML(reportData: ReportData): string {
     return `
       <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -129,12 +122,9 @@ export class ServicioEmail {
     `;
   }
 
-  /**
-   * Genera HTML de la tabla de Tiempo Operativo
-   */
   private static createTiempoOperativoHTML(reportData: ReportData): string {
     return `
-      <h3 style="color: #374151; margin-top: 30px;">⏱️ 0- Tiempo operativo día (minutos):</h3>
+      <h3 style="color: #374151; margin-top: 30px; margin-bottom: 15px;">⏱️ 0- Tiempo operativo día (minutos):</h3>
       <table style="border-collapse: collapse; width: 100%; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <thead style="background-color: #1f2937; color: white;">
           <tr>
@@ -160,9 +150,6 @@ export class ServicioEmail {
     `;
   }
 
-  /**
-   * Genera HTML de la tabla por Especie
-   */
   private static createEspecieHTML(reportData: ReportData): string {
     const rows = reportData.porEspecie.map((item, index) => `
       <tr style="background-color: ${index % 2 === 0 ? '#f9fafb' : 'white'};">
@@ -175,8 +162,15 @@ export class ServicioEmail {
       </tr>
     `).join('');
 
+    // Calcular totales
+    const totalRecepcion = reportData.porEspecie.reduce((sum, item) => sum + item.cajasRecepcion, 0);
+    const totalDevolucion = reportData.porEspecie.reduce((sum, item) => sum + item.cajasDevolucion, 0);
+    const totalFinales = reportData.porEspecie.reduce((sum, item) => sum + item.cajasFinales, 0);
+    const totalKilos = reportData.porEspecie.reduce((sum, item) => sum + item.kilosFinales, 0);
+    const totalEntregas = reportData.porEspecie.reduce((sum, item) => sum + item.entregas, 0);
+
     return `
-      <h3 style="color: #374151; margin-top: 30px;">🫐 1- Recepción por especie día:</h3>
+      <h3 style="color: #374151; margin-top: 30px; margin-bottom: 15px;">🫐 1- Recepción por especie día:</h3>
       <table style="border-collapse: collapse; width: 100%; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <thead style="background-color: #1f2937; color: white;">
           <tr>
@@ -188,14 +182,21 @@ export class ServicioEmail {
             <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Entregas</th>
           </tr>
         </thead>
-        <tbody>${rows}</tbody>
+        <tbody>
+          ${rows}
+          <tr style="background-color: #1f2937; font-weight: bold;">
+            <td style="padding: 10px; border: 1px solid #ddd; color: white;"><strong>Total general</strong></td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalRecepcion.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalDevolucion.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalFinales.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalKilos.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: center; border: 1px solid #ddd; color: white;">${totalEntregas}</td>
+          </tr>
+        </tbody>
       </table>
     `;
   }
 
-  /**
-   * Genera HTML de la tabla por SKU
-   */
   private static createSKUHTML(reportData: ReportData): string {
     const rows = reportData.porSKU.map((item, index) => `
       <tr style="background-color: ${index % 2 === 0 ? '#f9fafb' : 'white'};">
@@ -208,8 +209,15 @@ export class ServicioEmail {
       </tr>
     `).join('');
 
+    // Calcular totales
+    const totalRecepcion = reportData.porSKU.reduce((sum, item) => sum + item.cajasRecepcion, 0);
+    const totalDevolucion = reportData.porSKU.reduce((sum, item) => sum + item.cajasDevolucion, 0);
+    const totalFinales = reportData.porSKU.reduce((sum, item) => sum + item.cajasFinales, 0);
+    const totalKilos = reportData.porSKU.reduce((sum, item) => sum + item.kilosFinales, 0);
+    const totalEntregas = reportData.porSKU.reduce((sum, item) => sum + item.entregas, 0);
+
     return `
-      <h3 style="color: #374151; margin-top: 30px;">📦 2- Recepción por SKU día:</h3>
+      <h3 style="color: #374151; margin-top: 30px; margin-bottom: 15px;">📦 2- Recepción por SKU día:</h3>
       <table style="border-collapse: collapse; width: 100%; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <thead style="background-color: #1f2937; color: white;">
           <tr>
@@ -221,14 +229,21 @@ export class ServicioEmail {
             <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Entregas</th>
           </tr>
         </thead>
-        <tbody>${rows}</tbody>
+        <tbody>
+          ${rows}
+          <tr style="background-color: #1f2937; font-weight: bold;">
+            <td style="padding: 10px; border: 1px solid #ddd; color: white;"><strong>Total general</strong></td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalRecepcion.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalDevolucion.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalFinales.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalKilos.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: center; border: 1px solid #ddd; color: white;">${totalEntregas}</td>
+          </tr>
+        </tbody>
       </table>
     `;
   }
 
-  /**
-   * Genera HTML de la tabla por Productor
-   */
   private static createProductorHTML(reportData: ReportData): string {
     const rows = reportData.porProductor.map((item, index) => `
       <tr style="background-color: ${index % 2 === 0 ? '#f9fafb' : 'white'};">
@@ -241,8 +256,15 @@ export class ServicioEmail {
       </tr>
     `).join('');
 
+    // Calcular totales
+    const totalRecepcion = reportData.porProductor.reduce((sum, item) => sum + item.cajasRecepcion, 0);
+    const totalDevolucion = reportData.porProductor.reduce((sum, item) => sum + item.cajasDevolucion, 0);
+    const totalFinales = reportData.porProductor.reduce((sum, item) => sum + item.cajasFinales, 0);
+    const totalKilos = reportData.porProductor.reduce((sum, item) => sum + item.kilosFinales, 0);
+    const totalEntregas = reportData.porProductor.reduce((sum, item) => sum + item.entregas, 0);
+
     return `
-      <h3 style="color: #374151; margin-top: 30px;">👨‍🌾 3- Recepción por productor día:</h3>
+      <h3 style="color: #374151; margin-top: 30px; margin-bottom: 15px;">👨‍🌾 3- Recepción por productor día:</h3>
       <table style="border-collapse: collapse; width: 100%; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <thead style="background-color: #1f2937; color: white;">
           <tr>
@@ -254,7 +276,17 @@ export class ServicioEmail {
             <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Entregas</th>
           </tr>
         </thead>
-        <tbody>${rows}</tbody>
+        <tbody>
+          ${rows}
+          <tr style="background-color: #1f2937; font-weight: bold;">
+            <td style="padding: 10px; border: 1px solid #ddd; color: white;"><strong>Total general</strong></td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalRecepcion.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalDevolucion.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalFinales.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: white;">${totalKilos.toLocaleString()}</td>
+            <td style="padding: 10px; text-align: center; border: 1px solid #ddd; color: white;">${totalEntregas}</td>
+          </tr>
+        </tbody>
       </table>
     `;
   }
