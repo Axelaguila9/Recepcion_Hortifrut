@@ -56,18 +56,31 @@ export class ServicioEmail {
     });
   }
 
-  private static openEmailClient(): void {
+ private static openEmailClient(): void {
     const asunto = 'Reporte de Recepción la Cascada MX30';
     
-    const destinatariosPara = ['btacambaro2@hortifrut.com'].join(',');
+    // Destinatarios principales (PARA)
+    const destinatariosPara = [
+      'mariagaitanr@gmail.com',
+      'msaucedo@hortifrut.com',
+      'layala@hortifrut.com'
+    ].join(',');
     
+    // Destinatarios en copia (CC) - todos los demás
     const destinatariosCC = [
-      'msaucedo@hortifrut.com', 'layala@hortifrut.com', 'mariagaitanr@gmail.com',
-      'vsosa@hortifrut.com', 'hmeza@hortifrut.com', 'imondragon@hortifrut.com',
-      'jvargas@hortifrut.com', 'aatzimba@hortifrut.com', 'amiranda@hortifrut.com',
-      'fgamino@hortifrut.com', 'jrosas@hortifrut.com', 'asereno@hortifrut.com',
-      'jpenaloza@hortifrut.com', 'lramirez@hortifrut.com', 'lramirezm@hortifrut.com',
-      'lceja@hortifrut.com'
+      'lramirez@hortifrut.com',
+      'lceja@hortifrut.com',
+      'jpenaloza@hortifrut.com',
+      'asereno@hortifrut.com',
+      'jrosas@hortifrut.com',
+      'fgamino@hortifrut.com',
+      'amiranda@hortifrut.com',
+      'aatzimba@hortifrut.com',
+      'jvargasb@hortifrut.com',
+      'tmondragon@hortifrut.com',
+      'hmeza@hortifrut.com',
+      'vsosa@hortifrut.com',
+      'lramirezp@hortifrut.com'
     ].join(',');
     
     const mailtoLink = `mailto:${destinatariosPara}?subject=${encodeURIComponent(asunto)}&cc=${encodeURIComponent(destinatariosCC)}`;
