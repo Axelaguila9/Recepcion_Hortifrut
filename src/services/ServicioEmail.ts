@@ -61,7 +61,7 @@ export class ServicioEmail {
     
     // Destinatarios principales (PARA)
     const destinatariosPara = [
-      'mariagaitanr@gmail.com',
+      'marigaitanr@gmail.com',
       'msaucedo@hortifrut.com',
       'layala@hortifrut.com'
     ].join(',');
@@ -69,13 +69,13 @@ export class ServicioEmail {
     // Destinatarios en copia (CC) - todos los demás
     const destinatariosCC = [
       'lramirez@hortifrut.com',
-      'lceja@hortifrut.com',
+      'lcejac@hortifrut.com',
       'jpenaloza@hortifrut.com',
       'asereno@hortifrut.com',
       'jrosas@hortifrut.com',
       'fgamino@hortifrut.com',
       'amiranda@hortifrut.com',
-      'aatzimba@hortifrut.com',
+      'aarteaga@hortifrut.com',
       'jvargasb@hortifrut.com',
       'tmondragon@hortifrut.com',
       'hmeza@hortifrut.com',
