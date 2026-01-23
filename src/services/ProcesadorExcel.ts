@@ -145,12 +145,26 @@ export class ProcesadorExcel {
         }
       }
 
-      // 4. Paletizado = (Hora Inicio PreFrio - Hora Fin Rev. Calida) * 60 * 24
+      // 4. Paletizado - CON MANEJO DE CRUCE DE MEDIANOCHE
       if (row['Hora Fin Rev. Calida'] && row['Hora Inicio PreFrio']) {
-        const diff = convertExcelTimeToMinutes(
-          row['Hora Fin Rev. Calida'],
-          row['Hora Inicio PreFrio']
-        );
+        const finRevCalida = typeof row['Hora Fin Rev. Calida'] === 'string' 
+          ? (() => { const [h, m, s = 0] = row['Hora Fin Rev. Calida'].split(':').map(Number); return (h + m/60 + (s || 0)/3600) / 24; })()
+          : row['Hora Fin Rev. Calida'];
+        
+        const inicioPreFrio = typeof row['Hora Inicio PreFrio'] === 'string'
+          ? (() => { const [h, m, s = 0] = row['Hora Inicio PreFrio'].split(':').map(Number); return (h + m/60 + (s || 0)/3600) / 24; })()
+          : row['Hora Inicio PreFrio'];
+        
+        let diff: number;
+        
+        if (inicioPreFrio > finRevCalida) {
+          // Mismo día: resta directa
+          diff = (inicioPreFrio - finRevCalida) * 60 * 24;
+        } else {
+          // Cruce de medianoche: suma 1 día completo
+          diff = (1 - finRevCalida + inicioPreFrio) * 60 * 24;
+        }
+        
         tiempos.paletizado.push(diff);
       }
 
