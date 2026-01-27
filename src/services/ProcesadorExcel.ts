@@ -145,7 +145,7 @@ export class ProcesadorExcel {
         }
       }
 
-      // 4. Paletizado - CON MANEJO DE CRUCE DE MEDIANOCHE
+    // 4. Paletizado - CON MANEJO DE CRUCE DE MEDIANOCHE
       if (row['Hora Fin Rev. Calida'] && row['Hora Inicio PreFrio']) {
         const finRevCalida = typeof row['Hora Fin Rev. Calida'] === 'string' 
           ? (() => { const [h, m, s = 0] = row['Hora Fin Rev. Calida'].split(':').map(Number); return (h + m/60 + (s || 0)/3600) / 24; })()
@@ -173,28 +173,30 @@ export class ProcesadorExcel {
         const inicio = row['Hora Inicio PreFrio'];
         const fin = row['Hora Fin PreFrio'];
         
-        let diff;
+        let diff: number;
         let inicioNum: number;
         let finNum: number;
         
         if (typeof inicio === 'string') {
-          const [h, m, s] = inicio.split(':').map(Number);
-          inicioNum = (h + m/60 + s/3600) / 24;
+          const [h, m, s = 0] = inicio.split(':').map(Number);
+          inicioNum = (h + m/60 + (s || 0)/3600) / 24;
         } else {
           inicioNum = inicio;
         }
         
         if (typeof fin === 'string') {
-          const [h, m, s] = fin.split(':').map(Number);
-          finNum = (h + m/60 + s/3600) / 24;
+          const [h, m, s = 0] = fin.split(':').map(Number);
+          finNum = (h + m/60 + (s || 0)/3600) / 24;
         } else {
           finNum = fin;
         }
         
         if (inicioNum < finNum) {
-          diff = convertExcelTimeToMinutes(inicio, fin);
+          // Mismo día: resta directa
+          diff = (finNum - inicioNum) * 60 * 24;
         } else {
-          diff = convertExcelTimeToMinutes(inicio, fin) * 24;
+          // Cruce de medianoche: suma 1 día completo
+          diff = (1 - inicioNum + finNum) * 60 * 24;
         }
         
         tiempos.prefrio.push(diff);
