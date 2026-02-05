@@ -27,7 +27,7 @@ export default function Header() {
             </ul>
             
             <a 
-              href="https://us.docworkspace.com/d/sIHKn1KKLAvfWy8sG?sa=601.1037"
+              href="/PDF/GUIA_HORTIAPP.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 rounded-lg transition-colors font-medium"
