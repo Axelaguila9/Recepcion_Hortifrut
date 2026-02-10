@@ -37,7 +37,7 @@ export const calcularPromedio = (valores: number[]): string => {
   if (validos.length === 0) return '0.0';
   
   const promedio = validos.reduce((sum, val) => sum + val, 0) / validos.length;
-  return promedio.toFixed(7);
+  return promedio.toFixed(2);
 };
 
 /**
