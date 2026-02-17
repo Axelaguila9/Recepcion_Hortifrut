@@ -81,7 +81,7 @@ export class ServicioEmail {
       'hmeza@hortifrut.com',
       'vsosa@hortifrut.com',
       'lramirezp@hortifrut.com',
-      'etacambaro@hortifut.com'
+      'etacambaro@hortifrut.com'
     ].join(',');
     
     const mailtoLink = `mailto:${destinatariosPara}?subject=${encodeURIComponent(asunto)}&cc=${encodeURIComponent(destinatariosCC)}`;
